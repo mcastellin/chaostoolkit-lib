@@ -9,6 +9,7 @@ except ImportError:
 import platform
 import threading
 import time
+import copy
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -318,9 +319,18 @@ class Runner:
     ) -> None:
         experiment["title"] = substitute(experiment["title"], configuration, secrets)
         logger.info("Running experiment: {t}".format(t=experiment["title"]))
-
+        experiment_info=copy.deepcopy(experiment)
+        experiment_info["configuration"] = configuration
+        def hideSecrets(d):
+            for k, v in d.items():
+                if isinstance(v, dict):
+                    hideSecrets(v)
+                else:
+                    d[k] = "*****"
+            return d
+        experiment_info["secrets"] = hideSecrets(copy.deepcopy(secrets))
         started_at = time.time()
-        journal = journal or initialize_run_journal(experiment)
+        journal = journal or initialize_run_journal(experiment_info)
         event_registry.started(experiment, journal)
 
         control = Control()
