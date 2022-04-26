@@ -328,7 +328,8 @@ class Runner:
                 else:
                     d[k] = "*****"
             return d
-        experiment_info["secrets"] = hideSecrets(copy.deepcopy(secrets))
+        if experiment_info.get("secrets", None):
+            experiment_info["secrets"] = hideSecrets(copy.deepcopy(secrets))
         started_at = time.time()
         journal = journal or initialize_run_journal(experiment_info)
         event_registry.started(experiment, journal)
